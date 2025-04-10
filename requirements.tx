@@ -1,0 +1,9 @@
+dash
+pandas
+plotly
+gunicorn
+streamlit
+streamlit-option-menu
+streamlit-folium
+folium
+matplotlib
