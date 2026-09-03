@@ -40,11 +40,24 @@ def polish(fig: go.Figure, height: int = 410) -> go.Figure:
     fig.update_layout(
         height=height, margin=dict(l=20, r=20, t=65, b=25), paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)", font=dict(family="Inter, Arial", color=COLOR["navy"]),
-        title_font_size=19, legend=dict(orientation="h", y=1.02, x=1, xanchor="right"),
+        title=dict(font=dict(size=19, color=COLOR["navy"])),
+        legend=dict(orientation="h", y=1.02, x=1, xanchor="right", font=dict(color=COLOR["navy"])),
         hoverlabel=dict(bgcolor="white", font_size=13),
     )
-    fig.update_xaxes(showgrid=False, zeroline=False)
-    fig.update_yaxes(gridcolor="rgba(102,112,133,.14)", zeroline=False)
+    fig.update_xaxes(
+        showgrid=False, zeroline=False,
+        tickfont=dict(color="#475467"), title_font=dict(color="#344054"),
+    )
+    fig.update_yaxes(
+        gridcolor="rgba(102,112,133,.14)", zeroline=False,
+        tickfont=dict(color="#475467"), title_font=dict(color="#344054"),
+    )
+    fig.update_coloraxes(
+        colorbar=dict(
+            tickfont=dict(color="#475467"),
+            title=dict(font=dict(color="#344054")),
+        )
+    )
     return fig
 
 
@@ -118,12 +131,12 @@ if page == "Resumen ejecutivo":
     with left:
         fig = px.bar(summary, x="Ingreso", y="Departamento", orientation="h", color="Ahorro", color_continuous_scale=["#DDEAFE", COLOR["blue"]], title="Ingreso y ahorro promedio por departamento", custom_data=["Ahorro", "Hogares"])
         fig.update_traces(hovertemplate="<b>%{y}</b><br>Ingreso: $%{x:,.0f}<br>Ahorro: $%{customdata[0]:,.0f}<br>Hogares: %{customdata[1]}<extra></extra>")
-        st.plotly_chart(polish(fig), use_container_width=True)
+        st.plotly_chart(polish(fig), use_container_width=True, theme=None)
     with right:
         composition = pd.DataFrame({"Categoría": ["Alimentación", "Educación", "Ahorro"], "Valor": [filtered.Gasto_Alimentacion.mean(), filtered.Gasto_Educacion.mean(), filtered.Ahorro_Mensual.mean()]})
         fig = px.pie(composition, values="Valor", names="Categoría", hole=.62, color="Categoría", color_discrete_map={"Alimentación": COLOR["amber"], "Educación": COLOR["cyan"], "Ahorro": COLOR["green"]}, title="Asignación financiera promedio")
         fig.update_traces(textposition="outside", textinfo="percent+label", hovertemplate="<b>%{label}</b><br>$%{value:,.0f}<extra></extra>")
-        st.plotly_chart(polish(fig), use_container_width=True)
+        st.plotly_chart(polish(fig), use_container_width=True, theme=None)
     insights(filtered)
 
 elif page == "Análisis financiero":
@@ -133,28 +146,28 @@ elif page == "Análisis financiero":
         with c1:
             fig = px.histogram(filtered, x="Ingreso_Mensual", nbins=22, marginal="box", color_discrete_sequence=[COLOR["blue"]], title="Distribución del ingreso mensual")
             fig.update_traces(hovertemplate="Ingreso: $%{x:,.0f}<br>Hogares: %{y}<extra></extra>")
-            st.plotly_chart(polish(fig), use_container_width=True)
+            st.plotly_chart(polish(fig), use_container_width=True, theme=None)
         with c2:
             long = filtered.melt(id_vars="ID", value_vars=["Gasto_Alimentacion", "Gasto_Educacion", "Ahorro_Mensual"], var_name="Categoría", value_name="Valor")
             long["Categoría"] = long["Categoría"].map({"Gasto_Alimentacion": "Alimentación", "Gasto_Educacion": "Educación", "Ahorro_Mensual": "Ahorro"})
             fig = px.box(long, x="Categoría", y="Valor", color="Categoría", color_discrete_sequence=[COLOR["amber"], COLOR["cyan"], COLOR["green"]], title="Variabilidad de gastos y ahorro")
-            st.plotly_chart(polish(fig), use_container_width=True)
+            st.plotly_chart(polish(fig), use_container_width=True, theme=None)
     with tab2:
         c1, c2 = st.columns((1.2, 1))
         with c1:
             fig = px.scatter(filtered, x="Ingreso_Mensual", y="Ahorro_Mensual", color="Departamento", size="Gasto_Esencial", opacity=.72, title="Relación entre ingreso y ahorro", hover_name="Departamento")
             fig.update_traces(hovertemplate="<b>%{hovertext}</b><br>Ingreso: $%{x:,.0f}<br>Ahorro: $%{y:,.0f}<extra></extra>")
-            st.plotly_chart(polish(fig, 470), use_container_width=True)
+            st.plotly_chart(polish(fig, 470), use_container_width=True, theme=None)
         with c2:
             corr = filtered[MONEY + ["Gasto_Esencial", "Tasa_Ahorro"]].corr()
             labels = ["Ingreso", "Alimentación", "Educación", "Ahorro", "Gasto esencial", "Tasa ahorro"]
             fig = px.imshow(corr, x=labels, y=labels, text_auto=".2f", zmin=-1, zmax=1, color_continuous_scale=[COLOR["red"], "white", COLOR["blue"]], title="Matriz de correlaciones")
-            st.plotly_chart(polish(fig, 470), use_container_width=True)
+            st.plotly_chart(polish(fig, 470), use_container_width=True, theme=None)
     with tab3:
         segment = filtered.groupby("Segmento_Ingreso", observed=True).agg(Alimentación=("Gasto_Alimentacion", "mean"), Educación=("Gasto_Educacion", "mean"), Ahorro=("Ahorro_Mensual", "mean")).reset_index()
         long = segment.melt("Segmento_Ingreso", var_name="Categoría", value_name="Valor")
         fig = px.bar(long, x="Segmento_Ingreso", y="Valor", color="Categoría", barmode="group", color_discrete_map={"Alimentación": COLOR["amber"], "Educación": COLOR["cyan"], "Ahorro": COLOR["green"]}, title="Perfil financiero por cuartil de ingreso")
-        st.plotly_chart(polish(fig, 480), use_container_width=True)
+        st.plotly_chart(polish(fig, 480), use_container_width=True, theme=None)
         st.caption("Los segmentos se calculan sobre la muestra completa para permitir comparaciones consistentes.")
 
 elif page == "Mapa regional":
@@ -162,7 +175,7 @@ elif page == "Mapa regional":
     metric = st.selectbox("Indicador", ["Ingreso", "Ahorro", "Alimentación", "Tasa_Ahorro"], format_func=lambda x: x.replace("_", " "))
     fig = px.scatter_map(regional, lat="Latitud", lon="Longitud", size="Hogares", color=metric, hover_name="Departamento", custom_data=["Ingreso", "Ahorro", "Alimentación", "Tasa_Ahorro", "Hogares"], color_continuous_scale=["#DDEAFE", COLOR["blue"]], size_max=34, zoom=4.2, center={"lat": 4.6, "lon": -74.3}, map_style="carto-positron", title="Panorama financiero regional")
     fig.update_traces(hovertemplate="<b>%{hovertext}</b><br>Ingreso: $%{customdata[0]:,.0f}<br>Ahorro: $%{customdata[1]:,.0f}<br>Alimentación: $%{customdata[2]:,.0f}<br>Tasa de ahorro: %{customdata[3]:.1f}%<br>Hogares: %{customdata[4]}<extra></extra>")
-    st.plotly_chart(polish(fig, 620), use_container_width=True)
+    st.plotly_chart(polish(fig, 620), use_container_width=True, theme=None)
     st.info("El tamaño representa el número de hogares y el color, el indicador seleccionado. Las ubicaciones son referencias departamentales del dataset.")
 
 else:
