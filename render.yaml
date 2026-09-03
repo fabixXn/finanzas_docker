@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: finanzas-hogares-colombia
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /_stcore/health

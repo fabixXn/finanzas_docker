@@ -101,7 +101,7 @@ if filtered.empty:
     st.warning("No hay hogares que coincidan con los filtros.")
     st.stop()
 
-st.markdown(f"<div class='hero'><div class='eyebrow'>MIDIENDO LA REALIDAD CON DATOS</div><h1>Finanzas de los hogares colombianos</h1><p>Ingresos, gastos y capacidad de ahorro de {len(filtered)} hogares de la muestra.</p></div>", unsafe_allow_html=True)
+st.markdown(f"<div class='hero'><div class='eyebrow'>PORTAFOLIO · DATA ANALYTICS</div><h1>Finanzas de los hogares colombianos</h1><p>Ingresos, gastos y capacidad de ahorro de {len(filtered)} hogares de la muestra.</p></div>", unsafe_allow_html=True)
 
 if page == "Resumen ejecutivo":
     values = [
